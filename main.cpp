@@ -97,10 +97,11 @@ int main(int argc, char** argv)
 	// write it out for use in the python script
 	{
 		FILE* file = nullptr;
-		fopen_s(&file, "out.txt", "wb");
+		fopen_s(&file, "out/out.txt", "wb");
 		fprintf(file,
 			"    {\n"
 			"        \"title\": \"\",\n"
+			"        \"file\": \"\",\n"
 			"        \"fitx\": ["
 		);
 
@@ -123,6 +124,19 @@ int main(int argc, char** argv)
 				fprintf(file, ", ");
 
 			fprintf(file, "%f", dataPoints[i].y);
+		}
+
+		fprintf(file,
+			"],\n"
+			"        \"fitweight\": ["
+		);
+
+		for (int i = 0; i < c_numPoints; ++i)
+		{
+			if (i > 0)
+				fprintf(file, ", ");
+
+			fprintf(file, "%f", dataPoints[i].weight);
 		}
 		
 		fprintf(file,

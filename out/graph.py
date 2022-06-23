@@ -3,21 +3,15 @@ import numpy as np
 
 fits = [
     {
-        "title": "Linear fit",
-        "fitx": [1,3],
-        "fity": [2,3],
-        "constrainx": [2],
-        "constrainy": [4],
-        "fncoeffs": [3, 0.5],
-    },
-    {
         "title": "",
+        "file": "1.png",
         "fitx": [0.000000, 1.000000, 2.000000],
         "fity": [0.000000, 10.000000, 2.000000],
+        "fitweight": [1.000000, 1.000000, 1.000000],
         "constrainx": [],
         "constrainy": [],
         "fncoeffs": [3.000000, 1.000000],
-    }
+    },
 ]
 
 # in ascending order of power, starting with the constant term
@@ -28,7 +22,7 @@ def PolyCoefficients(x, coeffs):
     return y
 
 for fit in fits:
-    plt.figure()
+    fig = plt.figure()
 
     minx = min(fit["fitx"])
     maxx = max(fit["fitx"])
@@ -48,4 +42,5 @@ for fit in fits:
     plt.title(fit["title"])
     plt.legend()
 
-    plt.show()
+    fig.savefig(fit["file"])
+
