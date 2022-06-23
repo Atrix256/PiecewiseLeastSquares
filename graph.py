@@ -9,6 +9,14 @@ fits = [
         "constrainx": [2],
         "constrainy": [4],
         "fncoeffs": [3, 0.5],
+    },
+    {
+        "title": "",
+        "fitx": [0.000000, 1.000000, 2.000000],
+        "fity": [0.000000, 10.000000, 2.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [3.000000, 1.000000],
     }
 ]
 
@@ -22,8 +30,11 @@ def PolyCoefficients(x, coeffs):
 for fit in fits:
     plt.figure()
 
-    minx = min(min(fit["fitx"]), min(fit["constrainx"]))
-    maxx = max(max(fit["fitx"]), max(fit["constrainx"]))
+    minx = min(fit["fitx"])
+    maxx = max(fit["fitx"])
+    if len(fit["constrainx"]) > 0:
+        minx = min(minx, min(fit["constrainx"]))
+        maxx = max(maxx, max(fit["constrainx"]))
     
     fnx = np.linspace(minx, maxx, 100)
     plt.plot(fnx, PolyCoefficients(fnx, fit["fncoeffs"]), label="Polynomial Fit")

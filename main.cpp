@@ -14,6 +14,12 @@ using Vec = BaseVec<float, SIZE>;
 // 0 = constant, 1 = linear, 2 = quadratic, 3 = cubic, etc.
 #define DEGREE() 1
 
+struct ConstraintPoint
+{
+	float x = 0.0f;
+	float y = 0.0f;
+};
+
 struct DataPoint
 {
 	float x = 0.0f;
@@ -30,8 +36,19 @@ int main(int argc, char** argv)
 		{2.0f, 2.0f, 1.0f},
 	};
 
+#if 1
+	ConstraintPoint* constraintPoints = nullptr;
+	static const int c_numConstraintPoints = 0;
+#else
+	ConstraintPoint constraintPoints[] =
+	{
+		{}
+	};
+
+	static const int c_numConstraintPoints = _countof(constraintPoints);
+#endif
+
 	static const int c_numPoints = _countof(dataPoints);
-	printf("Fitting %i data points with a degree %i curve.\n\n", c_numPoints, DEGREE());
 
 	// Create the W weight matrix, that has weight_i at W_ii
 	MtxSq<c_numPoints> W{};
@@ -77,100 +94,91 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < DEGREE() + 1; ++i)
 		coefficients[i] = augmentedMatrix[i][Columns(ATWA)];
 
-	// Show the equation. Note that the first coefficient is the constant, then degree 1, then degree 2, etc, so iterate in reverse order
-	bool first = true;
-	printf("y = ");
-	for (int degree = DEGREE(); degree >= 0; --degree)
+	// write it out for use in the python script
 	{
-		if (!first)
-			printf(" + ");
+		FILE* file = nullptr;
+		fopen_s(&file, "out.txt", "wb");
+		fprintf(file,
+			"    {\n"
+			"        \"title\": \"\",\n"
+			"        \"fitx\": ["
+		);
 
-		if (degree > 0 && coefficients[degree] == 0.0f)
+		for (int i = 0; i < c_numPoints; ++i)
 		{
-			first = true;
-			continue;
+			if (i > 0)
+				fprintf(file, ", ");
+
+			fprintf(file, "%f", dataPoints[i].x);
 		}
 
-		if (degree > 1)
-			printf("%0.2fx^%i", coefficients[degree], degree);
-		else if (degree == 1)
-			printf("%0.2fx", coefficients[degree]);
-		else
-			printf("%0.2f", coefficients[degree]);
+		fprintf(file,
+			"],\n"
+			"        \"fity\": ["
+		);
 
-		first = false;
-	}
-
-	// Show how close the polynomial is to the data points given.
-	printf("\n\n");
-	for (int i = 0; i < c_numPoints; ++i)
-	{
-		float y = 0.0f;
-		float x = 1.0f;
-		for (int degree = 0; degree <= DEGREE(); ++degree)
+		for (int i = 0; i < c_numPoints; ++i)
 		{
-			y += coefficients[degree] * x;
-			x *= dataPoints[i].x;
+			if (i > 0)
+				fprintf(file, ", ");
+
+			fprintf(file, "%f", dataPoints[i].y);
+		}
+		
+		fprintf(file,
+			"],\n"
+			"        \"constrainx\": ["
+		);
+
+		for (int i = 0; i < c_numConstraintPoints; ++i)
+		{
+			if (i > 0)
+				fprintf(file, ", ");
+
+			fprintf(file, "%f", constraintPoints[i].x);
 		}
 
-		printf("data[%i]: (%f, %f) weight %0.2f, equation gives %f.  Error = %f\n", i, dataPoints[i].x, dataPoints[i].y, dataPoints[i].weight, y, y - dataPoints[i].y);
-	}
+		fprintf(file,
+			"],\n"
+			"        \"constrainy\": ["
+		);
 
-	// Convert from power series polynomial to bernstein form aka a Bezier curves
-	printf("\nBezier Control Points = [ ");
-	Vec<DEGREE() + 1> controlPoints;
-	{
-		// Divide by binomial coefficients
-		for (int i = 0; i < DEGREE() + 1; ++i)
-			coefficients[i] /= BinomialCoefficient<float>(DEGREE(), float(i));
-
-		// Do the reverse of making a difference table.
-		for (int j = 0; j < DEGREE(); ++j)
+		for (int i = 0; i < c_numConstraintPoints; ++i)
 		{
-			controlPoints[j] = (float)coefficients[0];
+			if (i > 0)
+				fprintf(file, ", ");
 
-			for (int i = 0; i < DEGREE(); ++i)
-				coefficients[i] += coefficients[i + 1];
-			printf("%0.2f, ", controlPoints[j]);
+			fprintf(file, "%f", constraintPoints[i].y);
 		}
-		controlPoints[DEGREE()] = (float)coefficients[0];
-		printf("%0.2f ]\n", controlPoints[DEGREE()]);
+
+		fprintf(file,
+			"],\n"
+			"        \"fncoeffs\": ["
+		);
+
+		for (size_t i = 0; i < DEGREE() + 1; ++i)
+		{
+			if (i > 0)
+				fprintf(file, ", ");
+
+			fprintf(file, "%f", coefficients[i]);
+		}
+
+		fprintf(file,
+			"],\n"
+			"    }\n"
+		);
+		fclose(file);
 	}
-
-	// Show the Bezier curve formula
-	first = true;
-	printf("\ny = f(t) = ");
-	for (int degree = 0; degree <= DEGREE(); ++degree)
-	{
-		if (!first)
-			printf(" + ");
-
-		int bc = BinomialCoefficient<int>(DEGREE(), degree);
-		if (bc != 1)
-			printf("%i*", bc);
-		printf("%0.2f", controlPoints[degree]);
-
-		int degree1MinusT = DEGREE() - degree;
-		int degreeT = degree;
-
-		if (degree1MinusT > 1)
-			printf("(1-t)^%i", degree1MinusT);
-		else if (degree1MinusT == 1)
-			printf("(1-t)");
-
-		if (degreeT > 1)
-			printf("t^%i", degreeT);
-		else if (degreeT == 1)
-			printf("t");
-
-		first = false;
-	}
-	printf("\n");
 }
 
 /*
 
 TODO:
+* compare weighted point vs constrainted point, both in a linear fit and a quadratic fit.
+ * make images that show increasing weight, and compare vs an actual constriant
 
-
+! can't define a quadratic by 2 points and a slope at midpoint. slope anywhere else is fine though.
+* link to cls.pdf, the one from email, and also the one about piecewise linear regresion with lots of lines then merging them.
+! could show generalized formula with symbols about summing powers times c_i
 */
