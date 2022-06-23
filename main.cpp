@@ -171,8 +171,6 @@ int main(int argc, char** argv)
 /*
 
 TODO:
-* the stuff you wrote on the paper
-* python to graph points and fit function
 
 
 */

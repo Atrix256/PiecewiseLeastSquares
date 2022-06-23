@@ -1,31 +1,40 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-fitx = [1,3]
-fity = [2,3]
+fits = [
+    {
+        "title": "Linear fit",
+        "fitx": [1,3],
+        "fity": [2,3],
+        "constrainx": [2],
+        "constrainy": [4],
+        "fncoeffs": [3, 0.5],
+    }
+]
 
-constrainx = [2]
-constrainy = [4]
-
-fndomain = [1, 3]
-fncoeffs = [3, 0.5]  # in ascending order of power, starting with the constant term
-
-title = "Linear fit"
-
+# in ascending order of power, starting with the constant term
 def PolyCoefficients(x, coeffs):
     y = 0
     for i in range(len(coeffs)):
         y += coeffs[i]*x**i
     return y
 
-fnx = np.linspace(fndomain[0], fndomain[1], 100)
-plt.plot(fnx, PolyCoefficients(fnx, fncoeffs), label="Polynomial Fit")
-plt.scatter(fitx, fity, label= "Fit Points")
-plt.scatter(constrainx, constrainy, label= "Constraint Points")
+for fit in fits:
+    plt.figure()
 
-#plt.xlabel('x')
-#plt.ylabel('y')
-plt.title(title)
-plt.legend()
+    minx = min(min(fit["fitx"]), min(fit["constrainx"]))
+    maxx = max(max(fit["fitx"]), max(fit["constrainx"]))
+    
+    fnx = np.linspace(minx, maxx, 100)
+    plt.plot(fnx, PolyCoefficients(fnx, fit["fncoeffs"]), label="Polynomial Fit")
+    plt.scatter(fit["fitx"], fit["fity"], label= "Fit Points")
 
-plt.show()
+    if len(fit["constrainx"]) > 0:
+        plt.scatter(fit["constrainx"], fit["constrainy"], label= "Constraint Points")
+
+    #plt.xlabel('x')
+    #plt.ylabel('y')
+    plt.title(fit["title"])
+    plt.legend()
+
+    plt.show()
