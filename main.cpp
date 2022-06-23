@@ -167,3 +167,12 @@ int main(int argc, char** argv)
 	}
 	printf("\n");
 }
+
+/*
+
+TODO:
+* the stuff you wrote on the paper
+* python to graph points and fit function
+
+
+*/
