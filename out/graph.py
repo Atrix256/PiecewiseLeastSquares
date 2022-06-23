@@ -3,15 +3,57 @@ import numpy as np
 
 fits = [
     {
-        "title": "",
-        "file": "1.png",
-        "fitx": [0.000000, 1.000000, 2.000000],
-        "fity": [0.000000, 10.000000, 2.000000],
+        "title": "Linear, Weight=0.0",
+        "file": "linweight1",
+        "fitx": [1.000000, 2.000000, 3.000000],
+        "fity": [2.000000, 4.000000, 3.000000],
+        "fitweight": [1.000000, 0.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [1.500000, 0.500000],
+    },
+    {
+        "title": "Linear, Weight=1.0",
+        "file": "linweight2",
+        "fitx": [1.000000, 2.000000, 3.000000],
+        "fity": [2.000000, 4.000000, 3.000000],
         "fitweight": [1.000000, 1.000000, 1.000000],
         "constrainx": [],
         "constrainy": [],
-        "fncoeffs": [3.000000, 1.000000],
+        "fncoeffs": [2.000000, 0.500000],
     },
+    {
+        "title": "Linear, Weight=2.0",
+        "file": "linweight3",
+        "fitx": [1.000000, 2.000000, 3.000000],
+        "fity": [2.000000, 4.000000, 3.000000],
+        "fitweight": [1.000000, 2.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [2.250000, 0.500000],
+    },
+    {
+        "title": "Linear, Weight=4.0",
+        "file": "linweight4",
+        "fitx": [1.000000, 2.000000, 3.000000],
+        "fity": [2.000000, 4.000000, 3.000000],
+        "fitweight": [1.000000, 4.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [2.500000, 0.500000],
+    },
+    {
+        "title": "Linear, Weight=100.0",
+        "file": "linweight5",
+        "fitx": [1.000000, 2.000000, 3.000000],
+        "fity": [2.000000, 4.000000, 3.000000],
+        "fitweight": [1.000000, 100.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [2.970603, 0.499992],
+    }
+
+
 ]
 
 # in ascending order of power, starting with the constant term

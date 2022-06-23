@@ -31,9 +31,9 @@ int main(int argc, char** argv)
 {
 	DataPoint dataPoints[] =
 	{
-		{0.0f, 0.0f, 1.0f},
-		{1.0f, 10.0f, 1.0f},
-		{2.0f, 2.0f, 1.0f},
+		{1.0f, 2.0f, 1.0f},
+		{2.0f, 4.0f, 100.0f},
+		{3.0f, 3.0f, 1.0f},
 	};
 
 #if 1
