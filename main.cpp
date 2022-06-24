@@ -14,10 +14,10 @@ using Vec = BaseVec<float, SIZE>;
 // 0 = constant, 1 = linear, 2 = quadratic, 3 = cubic, etc.
 #define DEGREE() 1
 
-struct ConstraintPoint
+struct Constraint
 {
-	float x = 0.0f;
-	float y = 0.0f;
+	Vec<DEGREE() + 1> lhs;
+	float rhs;
 };
 
 struct DataPoint
@@ -29,26 +29,59 @@ struct DataPoint
 
 int main(int argc, char** argv)
 {
+	// The data points to fit
 	DataPoint dataPoints[] =
 	{
 		{1.0f, 2.0f, 1.0f},
-		{2.0f, 4.0f, 100.0f},
+		//{2.0f, 4.0f, 100.0f},
 		{3.0f, 3.0f, 1.0f},
 	};
+	static const int c_numPoints = _countof(dataPoints);
 
+	// The constraint points
 #if 1
-	ConstraintPoint* constraintPoints = nullptr;
-	static const int c_numConstraintPoints = 0;
-#else
-	ConstraintPoint constraintPoints[] =
+	DataPoint constraintPoints[] =
 	{
-		{}
+		{2.0f, 4.0f}
 	};
-
 	static const int c_numConstraintPoints = _countof(constraintPoints);
+#else
+	DataPoint* constraintPoints = nullptr;
+	static const int c_numConstraintPoints = 0;
 #endif
 
-	static const int c_numPoints = _countof(dataPoints);
+	// The constraint values
+	// LHS is what the polynomial coefficients are multiplied by (like, powers of x, just like dataPoints)
+	// RHS is what the result of that multiplication should be (like, the y value of a datapoint)
+#if 0
+	Constraint constraintValues[] =
+	{
+		{{0.0f, 0.0f}, 0.0f}
+	};
+	static const int c_numConstraintValues = _countof(constraintValues);
+#else
+	Constraint* constraintValues = nullptr;
+	static const int c_numConstraintValues = 0;
+#endif
+
+	// unify the constraint data
+	static const int c_numConstraints = c_numConstraintPoints + c_numConstraintValues;
+	std::array<Constraint, c_numConstraints> constraints;
+	{
+		for (int i = 0; i < c_numConstraintPoints; ++i)
+		{
+			float x = 1.0f;
+			for (int j = 0; j < DEGREE() + 1; ++j)
+			{
+				constraints[i].lhs[j] = x;
+				x *= constraintPoints[i].x;
+			}
+			constraints[i].rhs = constraintPoints[i].y;
+		}
+
+		for (int i = 0; i < c_numConstraintValues; ++i)
+			constraints[c_numConstraintPoints + i] = constraintValues[i];
+	}
 
 	// Create the W weight matrix, that has weight_i at W_ii
 	MtxSq<c_numPoints> W{};
@@ -75,13 +108,31 @@ int main(int argc, char** argv)
 	auto ATWY = Multiply(ATW, Y);
 
 	// Make an augmented matrix where the matrix A^T*W*A is on the left side, and the vector A^T*W*Y is on the right side.
-	Mtx<Columns(ATWA) + 1, DEGREE() + 1> augmentedMatrix;
+	Mtx<Columns(ATWA) + 1 + c_numConstraints, DEGREE() + 1 + c_numConstraints> augmentedMatrix;
+	for (auto& i : augmentedMatrix)
+		std::fill(i.begin(), i.end(), 0.0f);
+
 	for (size_t iy = 0; iy < Rows(ATWA); ++iy)
 	{
 		for (size_t ix = 0; ix < Columns(ATWA); ++ix)
 			augmentedMatrix[iy][ix] = ATWA[iy][ix];
 
-		augmentedMatrix[iy][Columns(ATWA)] = ATWY[iy];
+		augmentedMatrix[iy][Columns(ATWA) + c_numConstraints] = ATWY[iy];
+	}
+
+	// Put the constraints in
+	for (int i = 0; i < c_numConstraints; ++i)
+	{
+		// Put in the row
+		for (int j = 0; j < DEGREE() + 1; ++j)
+			augmentedMatrix[Columns(ATWA) + i][j] = constraints[i].lhs[j];
+
+		// Put in the column
+		for (int j = 0; j < DEGREE() + 1; ++j)
+			augmentedMatrix[j][DEGREE() + 1 + i] = constraints[i].lhs[j];
+
+		// Put in the RHS
+		augmentedMatrix[Columns(ATWA) + i][DEGREE() + 1 + c_numConstraints] = constraints[i].rhs;
 	}
 
 	// Solve the equation for x:
@@ -92,7 +143,7 @@ int main(int argc, char** argv)
 	// Get our coefficients out
 	Vec<DEGREE() + 1> coefficients;
 	for (size_t i = 0; i < DEGREE() + 1; ++i)
-		coefficients[i] = augmentedMatrix[i][Columns(ATWA)];
+		coefficients[i] = augmentedMatrix[i][Columns(ATWA) + c_numConstraints];
 
 	// write it out for use in the python script
 	{
@@ -180,6 +231,7 @@ int main(int argc, char** argv)
 
 		fprintf(file,
 			"],\n"
+			"        \"ylim\":[],\n"
 			"    }\n"
 		);
 		fclose(file);

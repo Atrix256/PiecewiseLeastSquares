@@ -11,6 +11,7 @@ fits = [
         "constrainx": [],
         "constrainy": [],
         "fncoeffs": [1.500000, 0.500000],
+        "ylim":[0, 5],
     },
     {
         "title": "Linear, Weight=1.0",
@@ -21,6 +22,7 @@ fits = [
         "constrainx": [],
         "constrainy": [],
         "fncoeffs": [2.000000, 0.500000],
+        "ylim":[0, 5],
     },
     {
         "title": "Linear, Weight=2.0",
@@ -31,6 +33,7 @@ fits = [
         "constrainx": [],
         "constrainy": [],
         "fncoeffs": [2.250000, 0.500000],
+        "ylim":[0, 5],
     },
     {
         "title": "Linear, Weight=4.0",
@@ -41,6 +44,7 @@ fits = [
         "constrainx": [],
         "constrainy": [],
         "fncoeffs": [2.500000, 0.500000],
+        "ylim":[0, 5],
     },
     {
         "title": "Linear, Weight=100.0",
@@ -51,9 +55,19 @@ fits = [
         "constrainx": [],
         "constrainy": [],
         "fncoeffs": [2.970603, 0.499992],
+        "ylim":[0, 5],
+    },
+    {
+        "title": "Linear, Constraint",
+        "file": "linweight6",
+        "fitx": [1.000000, 3.000000],
+        "fity": [2.000000, 3.000000],
+        "fitweight": [1.000000, 1.000000],
+        "constrainx": [2.000000],
+        "constrainy": [4.000000],
+        "fncoeffs": [3.000000, 0.500000],
+        "ylim":[0, 5],
     }
-
-
 ]
 
 # in ascending order of power, starting with the constant term
@@ -75,6 +89,8 @@ for fit in fits:
     fnx = np.linspace(minx, maxx, 100)
     plt.plot(fnx, PolyCoefficients(fnx, fit["fncoeffs"]), label="Polynomial Fit")
     plt.scatter(fit["fitx"], fit["fity"], label= "Fit Points")
+
+    plt.ylim(fit["ylim"])
 
     if len(fit["constrainx"]) > 0:
         plt.scatter(fit["constrainx"], fit["constrainy"], label= "Constraint Points")
