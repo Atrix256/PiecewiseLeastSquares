@@ -59,11 +59,11 @@ int main(int argc, char** argv)
 	// The constraint values
 	// LHS is what the polynomial coefficients are multiplied by (like, powers of x, just like dataPoints)
 	// RHS is what the result of that multiplication should be (like, the y value of a datapoint)
-#if 0
+#if 1
 	Constraint constraintValues[] =
 	{
-		//{{1.0f, 3.0f, -1.0f, -3.0f}, 0.0f},
-		//{{0.0f, 1.0f, 0.0f, -1.0f}, 0.0f}
+		{{1.0f, 3.0f, 9.0f, -1.0f, -3.0f, -9.0f}, 0.0f},
+		{{0.0f, 1.0f, 6.0f, 0.0f, -1.0f, -6.0f}, 0.0f}
 	};
 	static const int c_numConstraintValues = _countof(constraintValues);
 #else
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 		std::fill(i.begin(), i.end(), 0.0f);
 	for (int y = 0; y < c_numPoints; ++y)
 	{
-		int xoffset = dataPoints[y].curveIndex * 2;
+		int xoffset = dataPoints[y].curveIndex * (DEGREE() + 1);
 		for (int x = 0; x < DEGREE() + 1; ++x)
 			A[y][x + xoffset] = powf(dataPoints[y].x, float(x));
 	}
@@ -354,14 +354,3 @@ int main(int argc, char** argv)
 	}
 
 }
-
-/*
-
-TODO:
-
-* print out polynomial? so it's useful to humans too.
-
-! can't define a quadratic by 2 points and a slope at midpoint. slope anywhere else is fine though.
-* link to cls.pdf, the one from email, and also the one about piecewise linear regresion with lots of lines then merging them.
-! could show generalized formula with symbols about summing powers times c_i
-*/
