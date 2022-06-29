@@ -148,16 +148,51 @@ fits = [
     {
         "title": "Piecewise Linear, no continuity",
         "file": "plin1",
-        "fitx": [1.000000, 2.000000, 3.000000, 4.000000, 5.000000, 6.000000],
-        "fity": [3.000000, 4.000000, 2.000000, 6.000000, 7.000000, 5.000000],
-        "fitweight": [1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000],
+        "fitx": [1.000000, 2.000000, 3.000000, 3.000000, 4.000000, 5.000000, 6.000000],
+        "fity": [3.000000, 4.000000, 2.000000, 2.000000, 6.000000, 7.000000, 5.000000],
+        "fitweight": [1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000],
         "constrainx": [],
         "constrainy": [],
-        "fncoeffs": [[4.000000, -0.500000], [8.500012, -0.500002]],
-        "fnxlims":[[1,3],[4,6]],
+        "fncoeffs": [[4.000000, -0.500000], [0.500000, 1.000000]],
+        "fnxlims":[[1,3],[3,6]],
         "ylim":[0, 8],
-    }    
-   
+    },
+    {
+        "title": "Piecewise Linear, C0 continuity",
+        "file": "plin2",
+        "fitx": [1.000000, 2.000000, 3.000000, 3.000000, 4.000000, 5.000000, 6.000000],
+        "fity": [3.000000, 4.000000, 2.000000, 2.000000, 6.000000, 7.000000, 5.000000],
+        "fitweight": [1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [[3.720001, -0.290001], [-0.419998, 1.090000]],
+        "fnxlims":[[1,3],[3,6]],
+        "ylim":[0, 8],
+    },
+    {
+        "title": "Piecewise Linear, C1 continuity",
+        "file": "plin3",
+        "fitx": [1.000000, 2.000000, 3.000000, 3.000000, 4.000000, 5.000000, 6.000000],
+        "fity": [3.000000, 4.000000, 2.000000, 2.000000, 6.000000, 7.000000, 5.000000],
+        "fitweight": [1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [[1.709678, 0.709677], [1.709678, 0.709677]],
+        "fnxlims":[[1,3],[3,6]],
+        "ylim":[0, 8],
+    },
+    {
+        "title": "Piecewise Quadratic, no continuity",
+        "file": "pquad1",
+        "fitx": [1.000000, 2.000000, 3.000000, 3.000000, 4.000000, 5.000000, 6.000000],
+        "fity": [3.000000, 4.000000, 2.000000, 2.000000, 6.000000, 7.000000, 5.000000],
+        "fitweight": [1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000],
+        "constrainx": [],
+        "constrainy": [],
+        "fncoeffs": [[-2.379485, 7.155382, -1.913845], [2.457052, -0.189484, -nan(ind)]],
+        "fnxlims":[[1,3],[3,6]],
+        "ylim":[0, 8],
+    }
     
 ]
 
@@ -190,21 +225,25 @@ for fit in fits:
     if len(fit["constrainx"]) > 0:
         plt.scatter(fit["constrainx"], fit["constrainy"], label= "Constraint Points")
 
-    title = fit["title"] + "\ny = f(x) = "
-    for i in range(len(fit["fncoeffs"])):
-        if i > 1:
-            title = title + " + "
-            title = title + str(fit["fncoeffs"][i]) + "*x^" + str(i)
-        elif i > 0:
-            title = title + " + "
-            title = title + str(fit["fncoeffs"][i]) + "*x"
-        else:
-            title = title + str(fit["fncoeffs"][i])
+    title = fit["title"]
+
+    for j in range(len(fit["fncoeffs"])):
+        title = title + "\ny = f(x) = "
+        for i in range(len(fit["fncoeffs"][j])):
+            if i > 1:
+                title = title + " + "
+                title = title + str(fit["fncoeffs"][j][i]) + "*x^" + str(i)
+            elif i > 0:
+                title = title + " + "
+                title = title + str(fit["fncoeffs"][j][i]) + "*x"
+            else:
+                title = title + str(fit["fncoeffs"][j][i])
 
     #plt.xlabel('x')
     #plt.ylabel('y')
     plt.title(title)
     plt.legend()
+    plt.tight_layout()
 
     fig.savefig(fit["file"])
 

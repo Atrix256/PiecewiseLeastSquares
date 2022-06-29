@@ -12,7 +12,7 @@ using Vec = BaseVec<float, SIZE>;
 
 // The degree of the curve to fit the data points to
 // 0 = constant, 1 = linear, 2 = quadratic, 3 = cubic, etc.
-#define DEGREE() 1
+#define DEGREE() 2
 #define NUM_CURVES() 2
 
 struct Constraint
@@ -62,7 +62,8 @@ int main(int argc, char** argv)
 #if 0
 	Constraint constraintValues[] =
 	{
-		{{0.0f, 1.0f, 2.0f}, 5.0f}
+		//{{1.0f, 3.0f, -1.0f, -3.0f}, 0.0f},
+		//{{0.0f, 1.0f, 0.0f, -1.0f}, 0.0f}
 	};
 	static const int c_numConstraintValues = _countof(constraintValues);
 #else
@@ -135,15 +136,15 @@ int main(int argc, char** argv)
 	for (int i = 0; i < c_numConstraints; ++i)
 	{
 		// Put in the row
-		for (int j = 0; j < DEGREE() + 1; ++j)
+		for (int j = 0; j < (DEGREE() + 1) * NUM_CURVES(); ++j)
 			augmentedMatrix[Columns(ATWA) + i][j] = constraints[i].lhs[j];
 
 		// Put in the column
-		for (int j = 0; j < DEGREE() + 1; ++j)
-			augmentedMatrix[j][DEGREE() + 1 + i] = constraints[i].lhs[j];
+		for (int j = 0; j < (DEGREE() + 1) * NUM_CURVES(); ++j)
+			augmentedMatrix[j][Rows(ATWA) + i] = constraints[i].lhs[j];
 
 		// Put in the RHS
-		augmentedMatrix[Columns(ATWA) + i][DEGREE() + 1 + c_numConstraints] = constraints[i].rhs;
+		augmentedMatrix[Columns(ATWA) + i][Rows(ATWA) + c_numConstraints] = constraints[i].rhs;
 	}
 
 	// Solve the equation for x:
